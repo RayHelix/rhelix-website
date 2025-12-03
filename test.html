@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rhelix Corporation — Enterprise AI Engineering & Automation</title>
+    <meta name="description"
+        content="Rhelix builds production AI systems — OCR, LLMs, multi-agent automation and workflow engineering for enterprises." />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        rhelix: {
+                            blue: '#3b82f6',
+                            purple: '#7c3aed',
+                            teal: '#06b6d4'
+                        }
+                    },
+                    keyframes: {
+                        floaty: {
+                            '0%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                            '100%': { transform: 'translateY(0px)' }
+                        }
+                    },
+                    animation: {
+                        floaty: 'floaty 6s ease-in-out infinite'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --dark-1: #070814;
+            --dark-2: #0b1020;
+            --card-dark: rgba(255, 255, 255, 0.04);
+            --glass-border-dark: rgba(255, 255, 255, 0.07);
+            --muted-dark: #94a3b8;
+            --accent-grad: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(124, 58, 237, 0.12));
+        }
+
+        /* glass */
+        .glass {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border-dark);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: background 0.35s ease, border-color 0.35s ease, color 0.25s ease, transform 0.12s ease;
+        }
+
+        /* Fade-in */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Light theme overrides */
+        html.light body {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+        }
+
+        html.light .glass {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border-color: rgba(15, 23, 42, 0.06) !important;
+            color: #0f172a !important;
+        }
+
+        html.light .muted {
+            color: #475569 !important;
+        }
+
+        html.light footer {
+            border-top-color: rgba(15, 23, 42, 0.06) !important;
+            color: #475569 !important;
+        }
+
+        /* general body background */
+        body {
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(800px 500px at 10% 10%, rgba(59, 130, 246, 0.06), transparent 6%),
+                radial-gradient(700px 450px at 90% 80%, rgba(124, 58, 237, 0.05), transparent 6%),
+                var(--dark-2);
+            color: #e6eef8;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.35s ease, color 0.35s ease;
+        }
+
+        /* utility for subtle glow */
+        .glow {
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.08), 0 2px 8px rgba(59, 130, 246, 0.04);
+        }
+
+        /* heading accent */
+        .accent-line {
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #7c3aed, #06b6d4);
+            border-radius: 3px;
+        }
+
+        /* ensure hero svg doesn't capture pointer events */
+        .decor-svg {
+            pointer-events: none;
+            opacity: 0.95;
+        }
+
+        /* responsive tweaks */
+        @media (max-width: 640px) {
+            .desktop-only {
+                display: none;
+            }
+
+            .mobile-stack {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- -------------------
+       SVG ICON SPRITE (Lucide-like)
+       Reuse with: <svg class="w-5 h-5"><use href="#icon-document"/></svg>
+       ------------------- -->
+    <svg style="display:none">
+        <symbol id="icon-document" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+        </symbol>
+
+        <symbol id="icon-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.5 10A6.5 6.5 0 0 0 7 8.5" />
+            <path d="M3.5 14A6.5 6.5 0 0 0 17 15.5" />
+            <path d="M12 3v2" />
+            <path d="M12 19v2" />
+            <path d="M4 12h2" />
+            <path d="M18 12h2" />
+        </symbol>
+
+        <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 1-9 9" />
+            <path d="M3 12a9 9 0 0 0 9 9" />
+            <circle cx="12" cy="12" r="3" />
+        </symbol>
+
+        <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </symbol>
+
+        <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M18 7v8" />
+            <path d="M13 11v4" />
+            <path d="M8 14v1" />
+        </symbol>
+
+        <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7 0l1-1a5 5 0 0 0-7-7" />
+            <path d="M14 11a5 5 0 0 0-7 0l-1 1a5 5 0 0 0 7 7" />
+        </symbol>
+
+        <symbol id="icon-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l9-6 9 6" />
+            <path d="M5 11v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
+            <path d="M10 21v-6" />
+            <path d="M14 21v-6" />
+        </symbol>
+
+        <symbol id="icon-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2h6v4H9z" />
+            <path d="M5 8h14v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z" />
+            <path d="M8 12h8" />
+            <path d="M8 16h8" />
+        </symbol>
+
+        <symbol id="icon-health" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 12c0 4.418-4.03 8-8 8s-8-3.582-8-8 4.03-8 8-8 8 3.582 8 8z" />
+            <path d="M9 12h6M12 9v6" />
+        </symbol>
+
+        <symbol id="icon-lightning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+        </symbol>
+
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path
+                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </symbol>
+
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </symbol>
+
+        <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+        </symbol>
+
+        <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+        </symbol>
+
+    </svg>
+
+    <!-- NAV -->
+    <header class="fixed top-4 left-0 right-0 z-40">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="glass rounded-2xl flex items-center justify-between p-3 md:p-4 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <a href="#" class="flex items-center gap-3 select-none">
+                        <!-- Minimal R mark -->
+                        <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden>
+                            <defs>
+                                <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                                    <stop offset="0" stop-color="#3b82f6" />
+                                    <stop offset="1" stop-color="#7c3aed" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="0" y="0" width="48" height="48" rx="10" fill="url(#g1)" opacity="0.12" />
+                            <path d="M14 12 H26 C30 12 32 14 32 18 C32 20 31 22 28 23 L20 28 V34" stroke="url(#g1)"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div>
+                            <div class="text-lg font-bold tracking-wide">Rhelix</div>
+                            <div class="text-xs muted -mt-0.5">Enterprise AI Engineering</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="hidden md:flex items-center gap-6 text-sm">
+                    <a class="hover:text-white/90" href="#why">Why</a>
+                    <a class="hover:text-white/90" href="#capabilities">Capabilities</a>
+                    <a class="hover:text-white/90" href="#usecases">Use Cases</a>
+                    <a class="hover:text-white/90" href="#approach">Approach</a>
+                    <a class="hover:text-white/90" href="#case-studies">Transformations</a>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- theme toggle (uses svg icons from sprite) -->
+                    <button id="themeToggle" aria-label="Toggle theme"
+                        class="glass p-2 rounded-md hover:scale-105 transition">
+                        <svg class="w-5 h-5 text-current">
+                            <use href="#icon-moon"></use>
+                        </svg>
+                    </button>
+
+                    <a href="#contact"
+                        class="hidden md:inline-block px-4 py-2 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] font-semibold shadow-sm hover:opacity-95">
+                        Book Consultation
+                    </a>
+
+                    <!-- mobile menu (simple) -->
+                    <div class="md:hidden">
+                        <button id="mobileMenuBtn" class="glass p-2 rounded-md">
+                            <svg class="w-5 h-5">
+                                <use href="#icon-menu" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <div id="mobileMenu" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden">
+        <div class="absolute top-20 left-4 right-4 glass rounded-xl p-4">
+            <div class="flex flex-col gap-3">
+                <a href="#why" class="py-2 px-3 rounded hover:bg-white/5">Why Rhelix</a>
+                <a href="#capabilities" class="py-2 px-3 rounded hover:bg-white/5">Capabilities</a>
+                <a href="#usecases" class="py-2 px-3 rounded hover:bg-white/5">Use Cases</a>
+                <a href="#approach" class="py-2 px-3 rounded hover:bg-white/5">Approach</a>
+                <a href="#case-studies" class="py-2 px-3 rounded hover:bg-white/5">Transformations</a>
+                <a href="#contact"
+                    class="py-3 px-3 rounded text-center bg-gradient-to-r from-[#3b82f6] to-[#7c3aed]">Book
+                    Consultation</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <main class="pt-28">
+        <section class="relative overflow-hidden">
+            <!-- decorative SVG / neural visual -->
+            <svg class="absolute right-0 top-0 md:top-8 md:right-8 w-[48rem] h-[40rem] opacity-30 decor-svg"
+                viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <defs>
+                    <linearGradient id="gradA" x1="0" x2="1">
+                        <stop offset="0" stop-color="#3b82f6" />
+                        <stop offset="1" stop-color="#7c3aed" />
+                    </linearGradient>
+                </defs>
+                <g transform="translate(40,20)" stroke="url(#gradA)" stroke-opacity="0.25" stroke-width="1" fill="none">
+                    <path d="M50 300 C150 80, 400 0, 700 120" stroke-linecap="round" />
+                    <path d="M30 360 C170 140, 420 40, 740 160" stroke-linecap="round" />
+                    <circle cx="610" cy="90" r="2" fill="#3b82f6" />
+                    <circle cx="540" cy="180" r="2" fill="#7c3aed" />
+                </g>
+            </svg>
+
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    <div class="lg:col-span-7">
+                        <div class="fade-in">
+                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+                                AI that understands your business — and executes it.
+                            </h1>
+
+                            <p class="mt-6 text-lg md:text-xl muted max-w-2xl">
+                                Rhelix engineers production-grade AI systems: document intelligence (OCR), custom LLMs,
+                                and automation pipelines that convert business rules into reliable, scalable workflows.
+                            </p>
+
+                            <div class="mt-8 flex flex-wrap items-center gap-4">
+                                <a href="#capabilities"
+                                    class="inline-flex items-center gap-3 px-5 py-3 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] font-semibold shadow-lg hover:scale-[1.02]">
+                                    Build With Us
+                                </a>
+                                <a href="#case-studies" class="glass px-4 py-3 rounded-lg hover:shadow-inner">
+                                    See Transformations
+                                </a>
+                                <a href="mailto:rhelixcorporation@gmail.com" class="ml-2 text-sm muted">or email us</a>
+                            </div>
+
+                            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                <div class="glass p-3 rounded-lg flex items-start gap-3">
+                                    <div class="bg-white/5 p-2 rounded-md self-start">
+                                        <svg class="w-5 h-5">
+                                            <use href="#icon-lightning" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Production-first</div>
+                                        <div class="muted text-xs">We deliver resilient, monitored deployments — not
+                                            demos.</div>
+                                    </div>
+                                </div>
+                                <div class="glass p-3 rounded-lg flex items-start gap-3">
+                                    <div class="bg-white/5 p-2 rounded-md self-start">
+                                        <svg class="w-5 h-5">
+                                            <use href="#icon-gear" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Custom engineering</div>
+                                        <div class="muted text-xs">From OCR to agents — code-first, cloud-ready systems.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Hero visual card -->
+                    <div class="lg:col-span-5">
+                        <div class="glass rounded-2xl p-6 glow animate-floaty">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="text-sm font-semibold">Live Preview</div>
+                                <div class="text-xs muted px-2 py-1 rounded bg-white/3">Beta</div>
+                            </div>
+                            <!-- miniature UI mock -->
+                            <div class="bg-gradient-to-b from-white/3 to-white/6 rounded-xl p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg"
+                                        style="background:linear-gradient(90deg,#3b82f6,#7c3aed)"></div>
+                                    <div>
+                                        <div class="font-semibold">Document Intake</div>
+                                        <div class="text-xs muted">OCR → Extraction → Validation</div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                    <div class="p-2 rounded-md glass text-xs flex items-center gap-2"><svg
+                                            class="w-4 h-4">
+                                            <use href="#icon-receipt" />
+                                        </svg> PII Detection</div>
+                                    <div class="p-2 rounded-md glass text-xs flex items-center gap-2"><svg
+                                            class="w-4 h-4">
+                                            <use href="#icon-chart" />
+                                        </svg> Confidence Scoring</div>
+                                    <div class="p-2 rounded-md glass text-xs flex items-center gap-2"><svg
+                                            class="w-4 h-4">
+                                            <use href="#icon-document" />
+                                        </svg> RAG + Q&A</div>
+                                    <div class="p-2 rounded-md glass text-xs flex items-center gap-2"><svg
+                                            class="w-4 h-4">
+                                            <use href="#icon-link" />
+                                        </svg> Workflow Triggers</div>
+                                </div>
+
+                                <div class="mt-4 bg-black/20 rounded-lg p-3">
+                                    <div class="text-xs muted">Last run</div>
+                                    <div class="text-sm font-medium">Processed 1,248 docs • 99.2% successful</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-xs muted">Monitored • Auditable • Scalable</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- WHY -->
+        <section id="why" class="py-20">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="grid lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 fade-in">
+                        <h3 class="text-2xl font-bold">Why Rhelix exists</h3>
+                        <div class="mt-4 muted">
+                            Enterprises need AI that understands business rules, compliance, and scale — not just model
+                            demos.
+                        </div>
+
+                        <ul class="mt-6 space-y-3 text-sm">
+                            <li class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-md bg-white/5 flex items-center justify-center"><svg
+                                        class="w-4 h-4">
+                                        <use href="#icon-gear" />
+                                    </svg></div>
+                                <div>
+                                    <div class="font-semibold">Engineering-first</div>
+                                    <div class="muted text-xs">We design production-ready AI systems with observability
+                                        and SLAs.</div>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-md bg-white/5 flex items-center justify-center"><svg
+                                        class="w-4 h-4">
+                                        <use href="#icon-lock" />
+                                    </svg></div>
+                                <div>
+                                    <div class="font-semibold">Compliance-aware</div>
+                                    <div class="muted text-xs">Built for audits, traceability, and enterprise controls.
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-md bg-white/5 flex items-center justify-center"><svg
+                                        class="w-4 h-4">
+                                        <use href="#icon-chart" />
+                                    </svg></div>
+                                <div>
+                                    <div class="font-semibold">Outcome-driven</div>
+                                    <div class="muted text-xs">We measure impact—time saved, error reduction, revenue
+                                        uplift.</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="lg:col-span-7 fade-in">
+                        <div class="glass rounded-2xl p-6">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="p-4">
+                                    <div class="text-sm muted">Avg. Time Saved</div>
+                                    <div class="text-2xl font-bold">80%</div>
+                                    <div class="text-xs muted">on manual document processing</div>
+                                </div>
+                                <div class="p-4 border-l border-white/5">
+                                    <div class="text-sm muted">Accuracy (OCR + RUL)</div>
+                                    <div class="text-2xl font-bold">>98%</div>
+                                    <div class="text-xs muted">validated on enterprise datasets</div>
+                                </div>
+                                <div class="p-4 border-l border-white/5">
+                                    <div class="text-sm muted">Deployment Time</div>
+                                    <div class="text-2xl font-bold">Weeks</div>
+                                    <div class="text-xs muted">from pilot to production</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CAPABILITIES BENTO GRID -->
+        <section id="capabilities" class="py-20">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-10 fade-in">
+                    <div class="text-sm uppercase text-white/70">Core Capabilities</div>
+                    <h2 class="text-3xl md:text-4xl font-bold">We build the AI your operations actually need</h2>
+                    <div class="mt-3 muted max-w-2xl mx-auto">From document intelligence to multi-agent orchestration —
+                        engineered to meet enterprise scale and compliance.</div>
+                </div>
+
+                <!-- Bento Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- Large card -->
+                    <div
+                        class="col-span-1 md:col-span-3 lg:col-span-2 glass rounded-2xl p-6 fade-in hover:scale-[1.02] transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">Document Intelligence</div>
+                                <h3 class="text-xl font-semibold mt-2">Advanced OCR & Vision Pipelines</h3>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-document" />
+                                </svg></div>
+                        </div>
+
+                        <p class="muted mt-4 text-sm">Custom pipelines for invoices, contracts, IDs and handwritten
+                            forms with validation, PII protection, and audit trails.</p>
+
+                        <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-start gap-2"><span class="text-xs">•</span> Multi-model OCR +
+                                post-correction</li>
+                            <li class="flex items-start gap-2"><span class="text-xs">•</span> Smart field extraction &
+                                normalization</li>
+                            <li class="flex items-start gap-2"><span class="text-xs">•</span> Confidence &
+                                human-in-the-loop</li>
+                        </ul>
+                    </div>
+
+                    <!-- other cards -->
+                    <div class="glass rounded-2xl p-5 fade-in hover:translate-y-0.5 transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">Generative AI</div>
+                                <div class="font-semibold">Custom LLMs & RAG</div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-brain" />
+                                </svg></div>
+                        </div>
+                        <div class="muted text-sm mt-3">Domain-tuned models, retrieval-augmented generation, secure
+                            knowledge bases.</div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-5 fade-in hover:translate-y-0.5 transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">Automation</div>
+                                <div class="font-semibold">Multi-Agent Workflows</div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-gear" />
+                                </svg></div>
+                        </div>
+                        <div class="muted text-sm mt-3">Design rule-driven agents that coordinate, escalate, and act
+                            across systems.</div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-5 fade-in hover:translate-y-0.5 transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">Compliance</div>
+                                <div class="font-semibold">Auditable Pipelines</div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-lock" />
+                                </svg></div>
+                        </div>
+                        <div class="muted text-sm mt-3">Traceable decisions, logging, and role-based access for
+                            regulated environments.</div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-5 fade-in hover:translate-y-0.5 transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">AI Ops</div>
+                                <div class="font-semibold">Monitoring & Observability</div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-chart" />
+                                </svg></div>
+                        </div>
+                        <div class="muted text-sm mt-3">Model and pipeline health, drift detection, and alerting for SLA
+                            guarantees.</div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-5 fade-in hover:translate-y-0.5 transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm muted">Integrations</div>
+                                <div class="font-semibold">APIs & Connectors</div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-6 h-6">
+                                    <use href="#icon-link" />
+                                </svg></div>
+                        </div>
+                        <div class="muted text-sm mt-3">Seamless connectors to ERPs, CRMs, and legacy systems—built for
+                            enterprise scale.</div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- USE CASES -->
+        <section id="usecases" class="py-20 bg-gradient-to-b from-transparent to-black/10">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center fade-in">
+                    <div class="text-sm uppercase text-white/70">Built For</div>
+                    <h2 class="text-3xl md:text-4xl font-bold">Production AI for Real Businesses</h2>
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold">Banking • Loan Processing</h4>
+                                <div class="muted text-sm">Automate KYC, document intake and underwriting decisions.
+                                </div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-7 h-7">
+                                    <use href="#icon-bank" />
+                                </svg></div>
+                        </div>
+                        <div class="mt-4 text-xs muted">Result: 70% faster approvals, reduced false positives.</div>
+                    </div>
+
+                    <div class="glass p-6 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold">Insurance • Claims Automation</h4>
+                                <div class="muted text-sm">Extract claims data, validate policies, accelerate payouts.
+                                </div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-7 h-7">
+                                    <use href="#icon-receipt" />
+                                </svg></div>
+                        </div>
+                        <div class="mt-4 text-xs muted">Result: 60% reduction in processing time.</div>
+                    </div>
+
+                    <div class="glass p-6 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold">Healthcare • Records & Intake</h4>
+                                <div class="muted text-sm">OCR for medical forms, LLM assistants for clinical teams.
+                                </div>
+                            </div>
+                            <div class="text-2xl"><svg class="w-7 h-7">
+                                    <use href="#icon-health" />
+                                </svg></div>
+                        </div>
+                        <div class="mt-4 text-xs muted">Result: Secure, auditable extraction and search.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- APPROACH -->
+        <section id="approach" class="py-20">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center fade-in">
+                    <div class="text-sm text-white/70">Our Approach</div>
+                    <h2 class="text-3xl font-bold">From Business Logic to Automated Systems</h2>
+                    <div class="muted mt-2">We translate domain rules into reliable AI pipelines with human oversight
+                        and enterprise controls.</div>
+                </div>
+
+                <div class="mt-10 grid md:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-2xl fade-in">
+                        <div class="text-sm muted">Step 1</div>
+                        <h3 class="font-semibold mt-2">Diagnose</h3>
+                        <p class="muted text-sm mt-2">Workshops to capture rules, risk, and metrics that matter to your
+                            operations.</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl fade-in">
+                        <div class="text-sm muted">Step 2</div>
+                        <h3 class="font-semibold mt-2">Architect</h3>
+                        <p class="muted text-sm mt-2">Design pipelines: OCR → NER → LLM → Agents → Monitor.</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl fade-in">
+                        <div class="text-sm muted">Step 3</div>
+                        <h3 class="font-semibold mt-2">Deliver & Operate</h3>
+                        <p class="muted text-sm mt-2">Deploy with observability, alerts, and lifecycle training for
+                            evolving data.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CASE STUDIES / TRANSFORMATIONS -->
+        <section id="case-studies" class="py-20 bg-gradient-to-b from-transparent to-black/5">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center fade-in">
+                    <h2 class="text-3xl font-bold">Transformations</h2>
+                    <div class="muted mt-2">Small pilots → enterprise rollout. Real numbers, real impact.</div>
+                </div>
+
+                <div class="mt-8 grid md:grid-cols-3 gap-6">
+                    <!-- card 1 -->
+                    <div class="glass p-5 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-sm muted">KYC Automation — Finance</div>
+                                <h4 class="font-semibold">Before → After</h4>
+                            </div>
+                            <div class="text-xs bg-black/20 px-2 py-1 rounded">Case</div>
+                        </div>
+                        <ul class="text-sm muted space-y-2">
+                            <li>Before: Manual intake (4 FTEs)</li>
+                            <li>After: OCR + validation pipeline</li>
+                            <li>Impact: 85% reduction in manual work • 3x throughput</li>
+                        </ul>
+                    </div>
+
+                    <!-- card 2 -->
+                    <div class="glass p-5 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-sm muted">Claims Triage — Insurance</div>
+                                <h4 class="font-semibold">Before → After</h4>
+                            </div>
+                            <div class="text-xs bg-black/20 px-2 py-1 rounded">Case</div>
+                        </div>
+                        <ul class="text-sm muted space-y-2">
+                            <li>Before: 3–5 day manual review</li>
+                            <li>After: Multi-agent triage & routing</li>
+                            <li>Impact: 60% faster payouts • fewer false escalations</li>
+                        </ul>
+                    </div>
+
+                    <!-- card 3 -->
+                    <div class="glass p-5 rounded-2xl fade-in hover:scale-[1.01] transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-sm muted">Clinical Records — Healthcare</div>
+                                <h4 class="font-semibold">Before → After</h4>
+                            </div>
+                            <div class="text-xs bg-black/20 px-2 py-1 rounded">Case</div>
+                        </div>
+                        <ul class="text-sm muted space-y-2">
+                            <li>Before: Fragmented forms & slow retrieval</li>
+                            <li>After: OCR + LLM search assistant</li>
+                            <li>Impact: 45% faster clinician lookup • secured audit logs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section id="contact" class="py-20">
+            <div class="max-w-4xl mx-auto px-6 text-center fade-in">
+                <div class="inline-block accent-line w-24 mb-4"></div>
+                <h2 class="text-3xl font-bold">Ready to automate your operations with reliable AI?</h2>
+                <p class="muted mt-3">Book a technical consultation. We'll map your business rules to a production AI
+                    system and show a 30/60/90 day implementation plan.</p>
+
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="mailto:rhelixcorporation@gmail.com?subject=Rhelix%20Consultation"
+                        class="px-6 py-3 bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] rounded-lg font-semibold">Book
+                        Consultation</a>
+                    <a href="#capabilities" class="glass px-5 py-3 rounded-lg">View Capabilities</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-8 border-t border-white/6 mt-8">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-sm muted">© <span id="year"></span> Rhelix Corporation — Built for enterprise AI</div>
+            <div class="flex items-center gap-4">
+                <a class="text-sm muted" href="#" aria-label="LinkedIn">LinkedIn</a>
+                <a class="text-sm muted" href="#" aria-label="GitHub">GitHub</a>
+                <a class="text-sm muted" href="#" aria-label="Twitter">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // set year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Mobile menu toggle
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.addEventListener('click', (e) => {
+                if (e.target === mobileMenu) mobileMenu.classList.add('hidden');
+            });
+        }
+
+        // Fade-in on scroll
+        const appear = () => {
+            const items = document.querySelectorAll('.fade-in');
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show');
+                    }
+                });
+            }, { threshold: 0.15 });
+            items.forEach(i => io.observe(i));
+        };
+        appear();
+
+        // Theme toggle with persistence (uses SVGs)
+        (function () {
+            const btn = document.getElementById('themeToggle');
+            const LS_KEY = 'rhelix_theme_v1';
+
+            function setIcon(type) {
+                if (type === 'light') {
+                    btn.innerHTML = '<svg class=\"w-5 h-5\"><use href=\"#icon-sun\"/></svg>';
+                } else {
+                    btn.innerHTML = '<svg class=\"w-5 h-5\"><use href=\"#icon-moon\"/></svg>';
+                }
+            }
+
+            function apply(theme) {
+                if (theme === 'light') {
+                    document.documentElement.classList.add('light');
+                    setIcon('light');
+                } else {
+                    document.documentElement.classList.remove('light');
+                    setIcon('dark');
+                }
+            }
+
+            // initial: respect saved, otherwise prefer dark (studio-first)
+            const saved = localStorage.getItem(LS_KEY);
+            if (saved) apply(saved);
+            else apply('dark');
+
+            btn.addEventListener('click', () => {
+                const isLight = document.documentElement.classList.contains('light');
+                const newTheme = isLight ? 'dark' : 'light';
+                apply(newTheme);
+                localStorage.setItem(LS_KEY, newTheme);
+            });
+
+            // optional: follow system if no choice made
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+                if (!localStorage.getItem(LS_KEY)) apply(e.matches ? 'light' : 'dark');
+            });
+        })();
+
+        // Small: improve focus ring visibility for keyboard users
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') document.body.classList.add('show-focus');
+        });
+
+        // Accessibility: smooth-scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href.length > 1) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+    </script>
+
+    <style>
+        /* small focus style for keyboard users */
+        .show-focus a:focus,
+        .show-focus button:focus {
+            outline: 3px solid rgba(99, 102, 241, 0.14);
+            outline-offset: 3px;
+            border-radius: 6px;
+        }
+    </style>
+
+</body>
+
+</html>
